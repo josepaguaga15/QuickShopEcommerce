@@ -1,0 +1,26 @@
+/* src/style.css */
+
+/* 1. Importamos las fuentes oficiales desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* 2. Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 3. Tipografía general aplicada a toda la página */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 4. Forzamos a que botones, inputs y formularios hereden la misma fuente */
+button, input, select, textarea {
+  font-family: inherit;
+}
