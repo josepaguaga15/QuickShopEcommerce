@@ -16,8 +16,8 @@ const saveCartToStorage = () => {
 
 // Acciones para modificar el carrito
 export const cartActions = {
-  addToCart(product, color = null) {
-    // 1. Verificar si el usuario ha iniciado sesión leyendo 'currentUser' (como se guarda en Cuenta.vue)
+  addToCart(product, color = null, size = null) {
+    // 1. Verificar si el usuario ha iniciado sesión
     const storedUser = localStorage.getItem('currentUser')
     const user = storedUser ? JSON.parse(storedUser) : null
 
@@ -26,9 +26,12 @@ export const cartActions = {
       return false // Detiene la ejecución si no hay usuario
     }
 
-    // 2. Determinar color seleccionado o por defecto
-    const selectedColorName = color || (product.colors && product.colors.length > 0 ? product.colors[0].name : null)
-    const cartItemId = `${product.id}-${selectedColorName || 'default'}`
+    // 2. Determinar color y talla seleccionados (toma la propiedad enviada en el objeto product o por parámetro)
+    const selectedColorName = product.selectedColor || color || (product.colors && product.colors.length > 0 ? product.colors[0].name : null)
+    const selectedSizeName = product.selectedSize || size || (product.sizes && product.sizes.length > 0 ? product.sizes[0] : null)
+
+    // 3. Crear un identificador único que incluya ID + Color + Talla
+    const cartItemId = `${product.id}-${selectedColorName || 'no-color'}-${selectedSizeName || 'no-size'}`
 
     const existingItem = cartState.items.find(item => item.cartItemId === cartItemId)
 
@@ -39,6 +42,7 @@ export const cartActions = {
         ...product,
         cartItemId,
         selectedColor: selectedColorName,
+        selectedSize: selectedSizeName, // <- Guardamos la talla seleccionada
         quantity: 1
       })
     }

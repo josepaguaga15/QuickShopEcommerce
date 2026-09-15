@@ -1,6 +1,6 @@
 <!-- src/views/Home.vue -->
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '../components/Header.vue'
 import ProductCard from '../components/ProductCard.vue'
@@ -8,21 +8,6 @@ import Footer from '../components/Footer.vue'
 import { cartActions } from '../Stores/cart.js'
 
 const router = useRouter()
-
-// Nueva función para agregar el producto desde el modal
-const handleAddToCartFromModal = () => {
-  if (!selectedProduct.value) return
-
-  cartActions.addToCart({
-    ...selectedProduct.value,
-    selectedColor: selectedColor.value
-  })
-
-  // Cerramos la ventana emergente tras agregar
-  closeModal()
-}
-
-
 
 // Helper para resolver rutas dinámicas desde src/assets/
 const getAssetUrl = (path) => {
@@ -48,30 +33,47 @@ const goToWhatsApp = () => {
 
 const goToProducts = () => {
   isFabOpen.value = false
-  router.push('/Products') // Redirige a la vista de productos
+  router.push('/Products')
 }
 
 const goToAccount = () => {
   isFabOpen.value = false
-  router.push('/Cuenta') // O la ruta que tengas configurada
+  router.push('/Cuenta')
 }
 
 // Artículos de oferta
 const offerProducts = ref([
   { 
-   id: 1, 
+    id: 1, 
     name: 'Casio MQ24', 
     category: 'Accesorios', 
     price: 20, 
     description: 'Reloj analógico de cuarzo para hombre | Resistente al agua | Caja y correa de resina | Diseño clásico y ligero.', 
     reviews: 121, 
-    image: getAssetUrl('Casio-MQ24.avif'),
+    image: getAssetUrl('Casio-MQ24.jpg'),
     colors: [
-      { name: 'Negro', hex: '#111111' },
-      { name: 'Blanco', hex: '#F5F5F5' },
-      { name: 'Dorado', hex: '#efb810' }
+      { 
+        name: 'Negro', 
+        hex: '#111111', 
+        variantImage: getAssetUrl('Casio-MQ24.jpg') 
+      },
+      { 
+        name: 'Blanco', 
+        hex: '#F5F5F5', 
+        variantImage: getAssetUrl('Casio-MQ24_White.png') 
+      },
+      { 
+        name: 'Dorado', 
+        hex: '#efb810', 
+        variantImage: getAssetUrl('Casio-MQ24_Gold.jpg') 
+      }
     ],
-    specs: ['Batería: Hasta 24 horas con estuche', 'Movimiento: Cuarzo', 'Estilo: Clásico / Casual','Resistencia al agua: Sí, para uso cotidiano']
+    specs: [
+      'Batería: Hasta 24 horas con estuche', 
+      'Movimiento: Cuarzo', 
+      'Estilo: Clásico / Casual',
+      'Resistencia al agua: Sí, para uso cotidiano'
+    ]
   },
   { 
     id: 3, 
@@ -80,7 +82,7 @@ const offerProducts = ref([
     price: 25, 
     description: 'Suplemento de glicinato de magnesio de 300 mg | Fórmula de alta absorción | Cápsulas para complementar la ingesta diaria de magnesio.', 
     reviews: 95, 
-    image: getAssetUrl('Magnesio-NatureMade.avif'),
+    image: getAssetUrl('Magnesio-NatureMade.png'),
     specs: ['Tipo: Glicinato de magnesio', 'Presentación: Cápsulas', 'Cantidad: 300 mg']
   },
   { 
@@ -100,10 +102,18 @@ const offerProducts = ref([
     price: 45, 
     description: 'Audífonos inalámbricos Sony | Diseño ligero y cómodo | Hasta 50 horas de batería | Conectividad Bluetooth.', 
     reviews: 98, 
-    image: getAssetUrl('Sony_WH-CH520.jpg'),
+    image: getAssetUrl('Sony_WH-CH520.png'),
     colors: [
-      { name: 'Gris Espacial', hex: '#4B4B4B' },
-      { name: 'Plata', hex: '#E0E0E0' }
+      { 
+        name: 'Negro', 
+        hex: '#4B4B4B', 
+        variantImage: getAssetUrl('Sony_WH-CH520.png') 
+      },
+      { 
+        name: 'Gris Espacial', 
+        hex: '#E0E0E0', 
+        variantImage: getAssetUrl('Sony_WH-CH520_Grey.png') 
+      }
     ],
     specs: ['Batería: Hasta 50 horas', 'Tipo: Audífonos inalámbricos', 'Almohadillas de malla transpirable']
   }
@@ -116,6 +126,22 @@ const scrollToOffers = () => {
   }
 }
 
+// Computada que devuelve la imagen correspondiente al color seleccionado
+const currentProductImage = computed(() => {
+  if (!selectedProduct.value) return ''
+  
+  if (selectedProduct.value.colors && selectedProduct.value.colors.length > 0) {
+    const activeColorObj = selectedProduct.value.colors.find(
+      c => c.name === selectedColor.value
+    )
+    if (activeColorObj && activeColorObj.variantImage) {
+      return activeColorObj.variantImage
+    }
+  }
+  
+  return selectedProduct.value.image
+})
+
 const openModal = (product) => {
   selectedProduct.value = product
   if (product.colors && product.colors.length > 0) {
@@ -125,6 +151,18 @@ const openModal = (product) => {
 
 const closeModal = () => {
   selectedProduct.value = null
+}
+
+const handleAddToCartFromModal = () => {
+  if (!selectedProduct.value) return
+
+  cartActions.addToCart({
+    ...selectedProduct.value,
+    selectedColor: selectedColor.value,
+    image: currentProductImage.value
+  })
+
+  closeModal()
 }
 </script>
 
@@ -170,9 +208,9 @@ const closeModal = () => {
         <button class="close-btn" @click="closeModal" aria-label="Cerrar ventana">✕</button>
         
         <div class="modal-grid">
-          <!-- Foto Ampliada -->
+          <!-- Foto Ampliada dinámicamente -->
           <div class="modal-image-wrapper">
-            <img :src="selectedProduct.image" :alt="selectedProduct.name" class="modal-image" />
+            <img :src="currentProductImage" :alt="selectedProduct.name" class="modal-image" />
           </div>
 
           <!-- Información Extendida -->
@@ -226,9 +264,7 @@ const closeModal = () => {
             <span class="fab-label">Productos</span>
           </button>
 
-          <!-- Opción Cuenta con tu SVG -->
           <button class="fab-item" @click="goToAccount">
-            
             <span class="fab-label">Cuenta</span>
           </button>
         </div>
@@ -248,7 +284,7 @@ const closeModal = () => {
       </button>
     </div>
   </div>
-<Footer />
+  <Footer />
 </template>
 
 <style scoped>
@@ -367,7 +403,6 @@ const closeModal = () => {
   color: #ffffff;
   border: none;
 }
-
 
 /* Transición animada */
 .fab-fade-enter-active,

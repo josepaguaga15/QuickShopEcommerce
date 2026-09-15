@@ -1,4 +1,3 @@
-
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -9,20 +8,7 @@ import { cartActions } from '../Stores/cart.js'
 
 const router = useRouter()
 
-// Nueva función para agregar el producto desde el modal
-const handleAddToCartFromModal = () => {
-  if (!selectedProduct.value) return
-
-  cartActions.addToCart({
-    ...selectedProduct.value,
-    selectedColor: selectedColor.value
-  })
-
-  // Cerramos la ventana emergente tras agregar
-  closeModal()
-}
-
-// Helper para resolver rutas dinámicas
+// Helper para resolver rutas dinámicas de imágenes
 const getAssetUrl = (path) => {
   return new URL(`../assets/Images/${path}`, import.meta.url).href
 }
@@ -32,12 +18,14 @@ const categories = ref([
   { id: 2, name: 'Tecnología', icon: '' },
   { id: 3, name: 'Medicina', icon: '' },
   { id: 4, name: 'Accesorios', icon: '' },
-  { id: 5, name: 'Perfumes', icon: '' }
+  { id: 5, name: 'Perfumes', icon: '' },
+  { id: 6, name: 'Ropa', icon: '' }
 ])
 
 const activeCategory = ref('Todos')
 const selectedProduct = ref(null)
 const selectedColor = ref('')
+const selectedSize = ref('') // <- NUEVO: Estado reactivo para la talla seleccionada
 
 // Estado para controlar el FAB
 const isFabOpen = ref(false)
@@ -59,19 +47,36 @@ const goToHome = () => {
 
 const allProducts = ref([
   { 
-   id: 1, 
+    id: 1, 
     name: 'Casio MQ24', 
     category: 'Accesorios', 
     price: 20, 
     description: 'Reloj analógico de cuarzo para hombre | Resistente al agua | Caja y correa de resina | Diseño clásico y ligero.', 
     reviews: 121, 
-    image: getAssetUrl('Casio-MQ24.avif'),
+    image: getAssetUrl('Casio-MQ24.jpg'),
     colors: [
-      { name: 'Negro', hex: '#111111' },
-      { name: 'Blanco', hex: '#F5F5F5' },
-      { name: 'Dorado', hex: '#efb810' }
+      { 
+        name: 'Negro', 
+        hex: '#111111', 
+        variantImage: getAssetUrl('Casio-MQ24.jpg') 
+      },
+      { 
+        name: 'Blanco', 
+        hex: '#F5F5F5', 
+        variantImage: getAssetUrl('Casio-MQ24_White.png') 
+      },
+      { 
+        name: 'Dorado', 
+        hex: '#efb810', 
+        variantImage: getAssetUrl('Casio-MQ24_Gold.jpg') 
+      }
     ],
-    specs: ['Batería: Hasta 24 horas con estuche', 'Movimiento: Cuarzo', 'Estilo: Clásico / Casual','Resistencia al agua: Sí, para uso cotidiano']
+    specs: [
+      'Batería: Hasta 24 horas con estuche', 
+      'Movimiento: Cuarzo', 
+      'Estilo: Clásico / Casual',
+      'Resistencia al agua: Sí, para uso cotidiano'
+    ]
   },
   { 
     id: 2, 
@@ -80,10 +85,15 @@ const allProducts = ref([
     price: 45, 
     description: 'Audífonos inalámbricos Sony | Diseño ligero y cómodo | Hasta 50 horas de batería | Conectividad Bluetooth.', 
     reviews: 98, 
-    image: getAssetUrl('Sony_WH-CH520.jpg'),
+    image: getAssetUrl('Sony_WH-CH520.png'),
     colors: [
-      { name: 'Gris Espacial', hex: '#4B4B4B' },
-      { name: 'Plata', hex: '#E0E0E0' }
+      { name: 'Negro',
+        hex: '#4B4B4B',
+        variantImage: getAssetUrl('Sony_WH-CH520.png')
+      },
+      { name: 'Gris Espacial', 
+        hex: '#E0E0E0', 
+        variantImage: getAssetUrl('Sony_WH-CH520_Grey.png') }
     ],
     specs: ['Batería: Hasta 50 horas', 'Tipo: Audífonos inalámbricos', 'Almohadillas de malla transpirable']
   },
@@ -94,7 +104,7 @@ const allProducts = ref([
     price: 25, 
     description: 'Suplemento de glicinato de magnesio de 300 mg | Fórmula de alta absorción | Cápsulas para complementar la ingesta diaria de magnesio.', 
     reviews: 95, 
-    image: getAssetUrl('Magnesio-NatureMade.avif'),
+    image: getAssetUrl('Magnesio-NatureMade.png'),
     specs: ['Tipo: Glicinato de magnesio', 'Presentación: Cápsulas', 'Cantidad: 300 mg']
   },
   { 
@@ -115,7 +125,6 @@ const allProducts = ref([
     description: 'Ariana Grande Thank U, Next Body Mist | Bruma corporal femenina | Fragancia dulce y floral para el uso diario.', 
     reviews: 210, 
     image: getAssetUrl('ArianaGrandeThankuNextBodyMist.avif'), 
-  
     specs: ['Marca: Ariana Grande', 'Familia olfativa: Dulce / Floral','Uso recomendado: Uso diario']
   },
   { 
@@ -126,8 +135,30 @@ const allProducts = ref([
     description: 'Club de Nuit Intense Man “La Bestia Negra” | Eau de Toilette para hombres | Fragancia cítrica, ahumada y amaderada con gran presencia.', 
     reviews: 200, 
     image: getAssetUrl('ClubDeNuit_Intense.webp'), 
-  
     specs: ['Presentación: 105 ml', 'Familia olfativa: Cítrica / Frutal / Amaderada','Uso recomendado: Día, noche, citas y ocasiones especiales']
+  },
+  { 
+    id: 7, 
+    name: 'Basic Camiseta', 
+    category: 'Ropa', 
+    price: 16, 
+    description: 'Camiseta básica de algodón 100% | Diseño moderno y cómodo | Ideal para el uso diario.', 
+    reviews: 200, 
+    image: getAssetUrl('CamisetaBasicBlack.png'), 
+    colors: [
+      { 
+        name: 'Negro', 
+        hex: '#111111', 
+        variantImage: getAssetUrl('CamisetaBasicBlack.png') 
+      },
+      { 
+        name: 'Blanco', 
+        hex: '#F5F5F5', 
+        variantImage: getAssetUrl('CamisetaBasicWhite.png') 
+      },
+    ],
+    sizes: ['S', 'M', 'L', 'XL'], // <- NUEVO: Array de tallas disponibles
+    specs: ['Material: 100% Algodón', 'Corte: Regular Fit', 'Cuidado: Lavado a máquina con agua fría']
   }
 ])
 
@@ -136,15 +167,52 @@ const filteredProducts = computed(() => {
   return allProducts.value.filter(p => p.category === activeCategory.value)
 })
 
+// Computada que devuelve la imagen correspondiente al color seleccionado
+const currentProductImage = computed(() => {
+  if (!selectedProduct.value) return ''
+  
+  if (selectedProduct.value.colors && selectedProduct.value.colors.length > 0) {
+    const activeColorObj = selectedProduct.value.colors.find(
+      c => c.name === selectedColor.value
+    )
+    if (activeColorObj && activeColorObj.variantImage) {
+      return activeColorObj.variantImage
+    }
+  }
+  
+  return selectedProduct.value.image
+})
+
 const openModal = (product) => {
   selectedProduct.value = product
   if (product.colors && product.colors.length > 0) {
     selectedColor.value = product.colors[0].name
   }
+  // <- NUEVO: Setea la primera talla por defecto si el producto tiene tallas
+  if (product.sizes && product.sizes.length > 0) {
+    selectedSize.value = product.sizes[0]
+  } else {
+    selectedSize.value = ''
+  }
 }
 
 const closeModal = () => {
   selectedProduct.value = null
+  selectedColor.value = ''
+  selectedSize.value = ''
+}
+
+const handleAddToCartFromModal = () => {
+  if (!selectedProduct.value) return
+
+  cartActions.addToCart({
+    ...selectedProduct.value,
+    selectedColor: selectedColor.value,
+    selectedSize: selectedSize.value, // <- NUEVO: Pasa la talla seleccionada al carrito
+    image: currentProductImage.value
+  })
+
+  closeModal()
 }
 </script>
 
@@ -185,7 +253,7 @@ const closeModal = () => {
         <button class="close-btn" @click="closeModal" aria-label="Cerrar ventana">✕</button>
         <div class="modal-grid">
           <div class="modal-image-wrapper">
-            <img :src="selectedProduct.image" :alt="selectedProduct.name" class="modal-image" />
+            <img :src="currentProductImage" :alt="selectedProduct.name" class="modal-image" />
           </div>
           <div class="modal-info">
             <span class="category-badge">{{ selectedProduct.category }}</span>
@@ -193,8 +261,9 @@ const closeModal = () => {
             <p class="product-price">${{ selectedProduct.price }} USD</p>
             <p class="product-description">{{ selectedProduct.description }}</p>
 
+            <!-- Opciones de Color -->
             <div v-if="selectedProduct.colors" class="section-block">
-              <span class="section-label">Opción / Tamaño: <strong>{{ selectedColor }}</strong></span>
+              <span class="section-label">Color: <strong>{{ selectedColor }}</strong></span>
               <div class="color-options">
                 <button 
                   v-for="color in selectedProduct.colors" 
@@ -208,6 +277,23 @@ const closeModal = () => {
               </div>
             </div>
 
+            <!-- Opciones de Talla (NUEVO) -->
+            <div v-if="selectedProduct.sizes" class="section-block">
+              <span class="section-label">Talla: <strong>{{ selectedSize }}</strong></span>
+              <div class="size-options">
+                <button 
+                  v-for="size in selectedProduct.sizes" 
+                  :key="size"
+                  class="size-btn"
+                  :class="{ selected: selectedSize === size }"
+                  @click="selectedSize = size"
+                >
+                  {{ size }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Especificaciones -->
             <div v-if="selectedProduct.specs" class="section-block">
               <span class="section-label">Especificaciones Clave:</span>
               <ul class="specs-list">
@@ -242,7 +328,6 @@ const closeModal = () => {
         @click="toggleFab"
         aria-label="Menú rápido"
       >
-        <!-- AQUÍ SE AGREGA TU SVG -->
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu">
           <path d="M4 5h16"/>
           <path d="M4 12h16"/>
@@ -266,16 +351,12 @@ const closeModal = () => {
   padding-bottom: 0.5rem;
   width: 100%;
   box-sizing: border-box;
-
-  /* Habilita desplazamiento táctil fluido en iOS/Android */
   -webkit-overflow-scrolling: touch; 
-  
-  /* Oculta la barra de scroll para una interfaz limpia */
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
 
 .categories-grid::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+  display: none;
 }
 .category-card { 
   background: #fff; 
@@ -288,22 +369,17 @@ const closeModal = () => {
   gap: 0.5rem; 
   font-weight: 600; 
   white-space: nowrap; 
-  flex-shrink: 0; /* IMPRESCINDIBLE: evita que el botón se comprima */
+  flex-shrink: 0;
   color: #060606 !important; 
-  -webkit-tap-highlight-color: transparent; /* Elimina el recuadro gris al tocar */
+  -webkit-tap-highlight-color: transparent;
 }
 .category-card.active { 
-  background: #0a0a0a; 
-  color: #fff; 
+  background: #0a0a0a !important; 
+  color: #ffffff !important; 
 }
 
 .category-card span {
   color: inherit !important;
-}
-
-.category-card.active { 
-  background: #0a0a0a !important; 
-  color: #ffffff !important; 
 }
 
 .category-card.active span {
@@ -328,6 +404,26 @@ const closeModal = () => {
 .color-options { display: flex; gap: 0.6rem; }
 .color-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
 .color-dot.selected { transform: scale(1.15); border-color: #000; }
+
+/* NUEVO: Estilos para botones de Talla */
+.size-options { display: flex; gap: 0.5rem; }
+.size-btn { 
+  min-width: 38px; 
+  height: 38px; 
+  border-radius: 8px; 
+  border: 1px solid #ddd; 
+  background: #f9f9f9; 
+  font-weight: 700; 
+  font-size: 0.85rem; 
+  cursor: pointer; 
+  transition: all 0.2s ease; 
+}
+.size-btn.selected { 
+  background: #000; 
+  color: #fff; 
+  border-color: #000; 
+}
+
 .specs-list { list-style: none; padding: 0; font-size: 0.82rem; color: #444; }
 .specs-list li { margin-bottom: 0.3rem; }
 .add-to-cart-btn { width: 100%; padding: 0.85rem; border-radius: 999px; border: none; background: #000; color: #fff; font-weight: 700; font-size: 0.9rem; cursor: pointer; margin-top: 0.5rem; }

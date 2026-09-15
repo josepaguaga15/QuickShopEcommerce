@@ -24,7 +24,6 @@ const downloadPDFInvoice = () => {
     hour: '2-digit',
     minute: '2-digit'
   })
-  
 
   // Estructura HTML para la factura
   const element = document.createElement('div')
@@ -58,6 +57,7 @@ const downloadPDFInvoice = () => {
               <td style="padding: 10px; border: 1px solid #ddd;">
                 <strong>${item.name}</strong>
                 ${item.selectedColor ? `<br><small style="color: #666;">Color: ${item.selectedColor}</small>` : ''}
+                ${item.selectedSize ? `<br><small style="color: #666;">Talla: ${item.selectedSize}</small>` : ''}
               </td>
               <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${item.quantity}</td>
               <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">$${item.price} USD</td>
@@ -92,7 +92,7 @@ const downloadPDFInvoice = () => {
   html2pdf().set(options).from(element).save()
 }
 
-// Función para enviar el pedido por WhatsApp incluyendo el nombre dinámico
+// Función para enviar el pedido por WhatsApp
 const sendWhatsAppOrder = () => {
   if (cartState.items.length === 0) return
 
@@ -100,8 +100,12 @@ const sendWhatsAppOrder = () => {
   let message = `¡Hola, soy ${userName}! Quisiera realizar el siguiente pedido:\n\n`
   
   cartState.items.forEach((item, index) => {
-    const colorInfo = item.selectedColor ? ` (Color: ${item.selectedColor})` : ''
-    message += `${index + 1}. *${item.name}*${colorInfo} x${item.quantity} - $${item.price * item.quantity} USD\n`
+    const details = []
+    if (item.selectedColor) details.push(`Color: ${item.selectedColor}`)
+    if (item.selectedSize) details.push(`Talla: ${item.selectedSize}`)
+    
+    const detailsText = details.length > 0 ? ` (${details.join(', ')})` : ''
+    message += `${index + 1}. *${item.name}*${detailsText} x${item.quantity} - $${item.price * item.quantity} USD\n`
   })
 
   message += `\n*Total a pagar:* $${totalCartPrice.value} USD`
@@ -140,7 +144,13 @@ const sendWhatsAppOrder = () => {
 
             <div class="item-details">
               <h3 class="item-name">{{ item.name }}</h3>
-              <p v-if="item.selectedColor" class="item-color">Color: {{ item.selectedColor }}</p>
+              
+              <!-- Color y Talla -->
+              <div class="item-specs">
+                <span v-if="item.selectedColor" class="item-color">Color: {{ item.selectedColor }}</span>
+                <span v-if="item.selectedSize" class="item-size">Talla: {{ item.selectedSize }}</span>
+              </div>
+
               <p class="item-price">${{ item.price }} USD c/u</p>
             </div>
 
@@ -333,10 +343,21 @@ const sendWhatsAppOrder = () => {
   text-overflow: ellipsis;
 }
 
-.item-color {
+.item-specs {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.2rem;
+}
+
+.item-color, .item-size {
   font-size: 0.8rem;
   color: #666;
-  margin: 0.2rem 0 0;
+  margin: 0;
+}
+
+.item-size {
+  font-weight: 600;
+  color: #333;
 }
 
 .item-price {
