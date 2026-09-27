@@ -275,7 +275,7 @@ const handleLogout = () => {
       <Transition name="fab-fade">
         <div v-if="isFabOpen" class="fab-options">
           <button class="fab-item whatsapp-item" @click="goToWhatsApp">
-            <span class="fab-icon">💬</span>
+            <span class="fab-icon"></span>
             <span class="fab-label">WhatsApp</span>
           </button>
           <button class="fab-item" @click="goToHome">

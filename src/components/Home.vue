@@ -43,7 +43,7 @@ const goToAccount = () => {
 
 // Artículos de oferta
 const offerProducts = ref([
-  { 
+{ 
     id: 1, 
     name: 'Casio MQ24', 
     category: 'Accesorios', 
@@ -56,17 +56,8 @@ const offerProducts = ref([
         name: 'Negro', 
         hex: '#111111', 
         variantImage: getAssetUrl('Casio-MQ24.jpg') 
-      },
-      { 
-        name: 'Blanco', 
-        hex: '#F5F5F5', 
-        variantImage: getAssetUrl('Casio-MQ24_White.png') 
-      },
-      { 
-        name: 'Dorado', 
-        hex: '#efb810', 
-        variantImage: getAssetUrl('Casio-MQ24_Gold.jpg') 
       }
+      
     ],
     specs: [
       'Batería: Hasta 24 horas con estuche', 
@@ -126,7 +117,7 @@ const scrollToOffers = () => {
   }
 }
 
-// Computada que devuelve la imagen correspondiente al color seleccionado
+// Estructura que devuelve la imagen correspondiente al color seleccionado
 const currentProductImage = computed(() => {
   if (!selectedProduct.value) return ''
   

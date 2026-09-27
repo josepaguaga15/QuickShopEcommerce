@@ -6,6 +6,17 @@ import ProductCard from '../components/ProductCard.vue'
 import Footer from '../components/Footer.vue'
 import { cartActions } from '../Stores/cart.js'
 
+// Estado para controlar el modal de Guía de Tallas
+const isSizeGuideOpen = ref(false)
+
+const openSizeGuide = () => {
+  isSizeGuideOpen.value = true
+}
+
+const closeSizeGuide = () => {
+  isSizeGuideOpen.value = false
+}
+
 const router = useRouter()
 
 // Helper para resolver rutas dinámicas de imágenes
@@ -25,7 +36,7 @@ const categories = ref([
 const activeCategory = ref('Todos')
 const selectedProduct = ref(null)
 const selectedColor = ref('')
-const selectedSize = ref('') // <- NUEVO: Estado reactivo para la talla seleccionada
+const selectedSize = ref('')
 
 // Estado para controlar el FAB
 const isFabOpen = ref(false)
@@ -59,16 +70,6 @@ const allProducts = ref([
         name: 'Negro', 
         hex: '#111111', 
         variantImage: getAssetUrl('Casio-MQ24.jpg') 
-      },
-      { 
-        name: 'Blanco', 
-        hex: '#F5F5F5', 
-        variantImage: getAssetUrl('Casio-MQ24_White.png') 
-      },
-      { 
-        name: 'Dorado', 
-        hex: '#efb810', 
-        variantImage: getAssetUrl('Casio-MQ24_Gold.jpg') 
       }
     ],
     specs: [
@@ -157,8 +158,69 @@ const allProducts = ref([
         variantImage: getAssetUrl('CamisetaBasicWhite.png') 
       },
     ],
-    sizes: ['S', 'M', 'L', 'XL'], // <- NUEVO: Array de tallas disponibles
+    sizes: ['S', 'M', 'L', 'XL'],
     specs: ['Material: 100% Algodón', 'Corte: Regular Fit', 'Cuidado: Lavado a máquina con agua fría']
+  },
+  { 
+    id: 8, 
+    name: 'Casio MQ24 Gold', 
+    category: 'Accesorios', 
+    price: 60, 
+    description: 'Reloj analógico de cuarzo para hombre | Resistente al agua | Caja y correa de resina | Diseño clásico y ligero.', 
+    reviews: 121, 
+    image: getAssetUrl('Casio-MQ24_Gold.jpg'),
+    colors: [
+      { 
+        name: 'Dorado', 
+        hex: '#efb810', 
+        variantImage: getAssetUrl('Casio-MQ24_Gold.jpg') 
+      }
+    ],
+    specs: [
+      'Batería: Hasta 24 horas con estuche', 
+      'Movimiento: Cuarzo', 
+      'Estilo: Clásico / Casual',
+      'Resistencia al agua: Sí, para uso cotidiano'
+    ]
+  },
+  { 
+    id: 9, 
+    name: 'Casio MQ24 White', 
+    category: 'Accesorios', 
+    price: 60, 
+    description: 'Reloj analógico de cuarzo para hombre | Resistente al agua | Caja y correa de resina | Diseño clásico y ligero.', 
+    reviews: 121, 
+    image: getAssetUrl('Casio-MQ24_White.png'),
+    colors: [
+      { 
+        name: 'Blanco', 
+        hex: '#F5F5F5', 
+        variantImage: getAssetUrl('Casio-MQ24_White.png') 
+      }
+    ],
+    specs: [
+      'Batería: Hasta 24 horas con estuche', 
+      'Movimiento: Cuarzo', 
+      'Estilo: Clásico / Casual',
+      'Resistencia al agua: Sí, para uso cotidiano'
+    ]
+  },
+  { 
+    id: 10, 
+    name: 'Reebok C 85', 
+    category: 'Ropa', 
+    price: 90, 
+    description: 'Zapatos urbanos de diseño moderno y suela ergonómica. Máximo confort y estilo para el uso diario.', 
+    reviews: 42, 
+    image: getAssetUrl('ReebookC85WhiteGreen.png'), 
+  
+    sizes: ['8', '9', '10'], 
+    sizeGuide: [
+      { size: '8 US', cm: '26.0 cm' },
+      { size: '9 US', cm: '27.0 cm' },
+      { size: '10 US', cm: '28.0 cm' }
+    ],
+    specs: ['Material exterior: Sintético de alta durabilidad', 'Suela: Goma antideslizante', 'Ajuste: Cordones']
   }
 ])
 
@@ -167,7 +229,6 @@ const filteredProducts = computed(() => {
   return allProducts.value.filter(p => p.category === activeCategory.value)
 })
 
-// Computada que devuelve la imagen correspondiente al color seleccionado
 const currentProductImage = computed(() => {
   if (!selectedProduct.value) return ''
   
@@ -188,7 +249,6 @@ const openModal = (product) => {
   if (product.colors && product.colors.length > 0) {
     selectedColor.value = product.colors[0].name
   }
-  // <- NUEVO: Setea la primera talla por defecto si el producto tiene tallas
   if (product.sizes && product.sizes.length > 0) {
     selectedSize.value = product.sizes[0]
   } else {
@@ -208,7 +268,7 @@ const handleAddToCartFromModal = () => {
   cartActions.addToCart({
     ...selectedProduct.value,
     selectedColor: selectedColor.value,
-    selectedSize: selectedSize.value, // <- NUEVO: Pasa la talla seleccionada al carrito
+    selectedSize: selectedSize.value,
     image: currentProductImage.value
   })
 
@@ -247,7 +307,7 @@ const handleAddToCartFromModal = () => {
       </div>
     </main>
 
-    <!-- POP-UP MODAL -->
+    <!-- POP-UP MODAL PRINCIPAL DE PRODUCTO -->
     <div v-if="selectedProduct" class="modal-overlay" @click.self="closeModal">
       <div class="modal-card">
         <button class="close-btn" @click="closeModal" aria-label="Cerrar ventana">✕</button>
@@ -277,9 +337,20 @@ const handleAddToCartFromModal = () => {
               </div>
             </div>
 
-            <!-- Opciones de Talla (NUEVO) -->
+            <!-- Opciones de Talla + Botón Guía de Tallas -->
             <div v-if="selectedProduct.sizes" class="section-block">
-              <span class="section-label">Talla: <strong>{{ selectedSize }}</strong></span>
+              <div class="size-header">
+                <span class="section-label">Talla: <strong>{{ selectedSize }}</strong></span>
+                
+                <button 
+                  v-if="selectedProduct.sizeGuide" 
+                  class="size-guide-link" 
+                  @click="openSizeGuide"
+                >
+                   Guía de tallas
+                </button>
+              </div>
+
               <div class="size-options">
                 <button 
                   v-for="size in selectedProduct.sizes" 
@@ -307,12 +378,36 @@ const handleAddToCartFromModal = () => {
       </div>
     </div>
 
+    <!-- SUB-MODAL: GUÍA DE TALLAS -->
+    <div v-if="isSizeGuideOpen" class="modal-overlay size-guide-overlay" @click.self="closeSizeGuide">
+      <div class="size-guide-card">
+        <button class="close-btn" @click="closeSizeGuide" aria-label="Cerrar guía">✕</button>
+        <h3 class="guide-title"> Guía de Tallas de Calzado</h3>
+        <p class="guide-subtitle">Mide la longitud de tu pie desde el talón hasta el dedo más largo.</p>
+
+        <table class="size-guide-table">
+          <thead>
+            <tr>
+              <th>Talla (US)</th>
+              <th>Equivalencia (CM)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in selectedProduct?.sizeGuide" :key="item.size">
+              <td><strong>{{ item.size }}</strong></td>
+              <td>{{ item.cm }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- BOTÓN FLOTANTE (FAB): WHATSAPP + INICIO -->
     <div class="fab-container">
       <Transition name="fab-fade">
         <div v-if="isFabOpen" class="fab-options">
           <button class="fab-item whatsapp-item" @click="goToWhatsApp">
-            <span class="fab-icon">💬</span>
+            <span class="fab-icon"></span>
             <span class="fab-label">WhatsApp</span>
           </button>
           <button class="fab-item" @click="goToHome">
@@ -387,7 +482,7 @@ const handleAddToCartFromModal = () => {
 }
 .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
 
-/* Modal */
+/* Modal Principal */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1.5rem; }
 .modal-card { background: #ffffff; border-radius: 24px; max-width: 780px; width: 100%; padding: 2rem; position: relative; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); }
 .close-btn { position: absolute; top: 1.2rem; right: 1.2rem; background: #f0f0f0; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -405,7 +500,31 @@ const handleAddToCartFromModal = () => {
 .color-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
 .color-dot.selected { transform: scale(1.15); border-color: #000; }
 
-/* NUEVO: Estilos para botones de Talla */
+/* Header de Tallas con botón de Guía */
+.size-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.size-header .section-label {
+  margin-bottom: 0;
+}
+.size-guide-link {
+  background: none;
+  border: none;
+  color: #000000;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+.size-guide-link:hover {
+  color: #000;
+}
+
+/* Botones de Talla */
 .size-options { display: flex; gap: 0.5rem; }
 .size-btn { 
   min-width: 38px; 
@@ -422,6 +541,49 @@ const handleAddToCartFromModal = () => {
   background: #000; 
   color: #fff; 
   border-color: #000; 
+}
+
+/* Sub-modal Guía de Tallas */
+.size-guide-overlay {
+  z-index: 1100;
+}
+.size-guide-card {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 420px;
+  width: 100%;
+  padding: 1.8rem;
+  position: relative;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+}
+.guide-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 0.3rem;
+}
+.guide-subtitle {
+  font-size: 0.82rem;
+  color: #666;
+  margin-bottom: 1.2rem;
+}
+.size-guide-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.size-guide-table th {
+  background-color: #f4f5f0;
+  color: #111;
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  font-weight: 700;
+  border-bottom: 2px solid #ddd;
+}
+.size-guide-table td {
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid #eee;
+  color: #333;
 }
 
 .specs-list { list-style: none; padding: 0; font-size: 0.82rem; color: #444; }
