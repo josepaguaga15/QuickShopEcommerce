@@ -1,5 +1,6 @@
 <!-- src/views/Cart.vue -->
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '../components/Header.vue'
 import Footer from '../components/Footer.vue'
@@ -8,8 +9,32 @@ import html2pdf from 'html2pdf.js'
 
 const router = useRouter()
 
+// Estado para controlar el FAB en móvil
+const isFabOpen = ref(false)
+
+const toggleFab = () => {
+  isFabOpen.value = !isFabOpen.value
+}
+
+// Acciones del FAB
+const goToWhatsAppDirect = () => {
+  isFabOpen.value = false
+  window.open('https://wa.me/50582363237', '_blank')
+}
+
 const goToProducts = () => {
+  isFabOpen.value = false
   router.push('/Products')
+}
+
+const goToAccount = () => {
+  isFabOpen.value = false
+  router.push('/Cuenta')
+}
+
+const goToHome = () => {
+  isFabOpen.value = false
+  router.push('/')
 }
 
 // Función para generar y descargar la factura en PDF
@@ -55,13 +80,11 @@ const downloadPDFInvoice = () => {
           ${cartState.items.map(item => `
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 10px; border: 1px solid #ddd;">
-                <strong>${item.name}</strong>
-                ${item.selectedColor ? `<br><small style="color: #666;">Color: ${item.selectedColor}</small>` : ''}
+                <strong>${item.name}</strong>${item.selectedColor ? `<br><small style="color: #666;">Color: ${item.selectedColor}</small>` : ''}
                 ${item.selectedSize ? `<br><small style="color: #666;">Talla: ${item.selectedSize}</small>` : ''}
               </td>
               <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${item.quantity}</td>
-              <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">$${item.price} USD</td>
-              <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">$${item.price * item.quantity} USD</td>
+              <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">$${item.price} USD</td>               <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">$${item.price * item.quantity} USD</td>
             </tr>
           `).join('')}
         </tbody>
@@ -216,6 +239,38 @@ const sendWhatsAppOrder = () => {
         </div>
       </div>
     </main>
+
+    <!-- BOTÓN FLOTANTE (FAB) PARA MÓVIL -->
+    <div class="fab-container">
+      <Transition name="fab-fade">
+        <div v-if="isFabOpen" class="fab-options">
+          <button class="fab-item whatsapp-item" @click="goToWhatsAppDirect">
+            <span class="fab-icon"></span>
+            <span class="fab-label">WhatsApp</span>
+          </button>
+          <button class="fab-item" @click="goToAccount">
+            <span class="fab-label">Cuenta</span>
+          </button>
+          <button class="fab-item" @click="goToHome">
+            <span class="fab-icon"></span>
+            <span class="fab-label">Inicio</span>
+          </button>
+        </div>
+      </Transition>
+
+      <button 
+        class="fab-main-btn" 
+        :class="{ active: isFabOpen }" 
+        @click="toggleFab"
+        aria-label="Menú rápido"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu">
+          <path d="M4 5h16"/>
+          <path d="M4 12h16"/>
+          <path d="M4 19h16"/>
+        </svg>
+      </button>
+    </div>
 
     <Footer />
   </div>
@@ -410,6 +465,7 @@ const sendWhatsAppOrder = () => {
   padding: 0.4rem;
   transition: color 0.2s;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .delete-btn:hover {
@@ -506,8 +562,94 @@ const sendWhatsAppOrder = () => {
   background: #1eb954;
 }
 
+/* Botón Flotante (FAB) */
+.fab-container {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.fab-main-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #000000;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fab-main-btn.active {
+  transform: rotate(45deg);
+  background-color: #c87a4b;
+}
+
+.fab-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: flex-end;
+}
+
+.fab-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  color: #111111;
+  border: 1px solid #e0e0e0;
+  padding: 10px 16px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.2s ease, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fab-item:active {
+  transform: scale(0.95);
+}
+
+.whatsapp-item {
+  background: #25d366;
+  color: #ffffff;
+  border: none;
+}
+
+.fab-icon {
+  font-size: 1.1rem;
+}
+
+.fab-fade-enter-active, .fab-fade-leave-active {
+  transition: all 0.25s ease;
+}
+
+.fab-fade-enter-from, .fab-fade-leave-to {
+  opacity: 0;
+  transform: translateY(15px) scale(0.9);
+}
+
 /* Adaptación Responsive para Móvil */
 @media (max-width: 768px) {
+  .fab-container {
+    display: flex;
+  }
+
   .main-container {
     padding: 1.5rem 0.8rem;
   }

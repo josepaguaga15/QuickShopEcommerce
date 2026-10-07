@@ -56,6 +56,12 @@ const goToHome = () => {
   router.push('/')
 }
 
+const goToAccount = () => {
+  isFabOpen.value = false
+  router.push('/Cuenta')
+}
+
+
 const allProducts = ref([
   { 
     id: 1, 
@@ -409,6 +415,9 @@ const handleAddToCartFromModal = () => {
           <button class="fab-item whatsapp-item" @click="goToWhatsApp">
             <span class="fab-icon"></span>
             <span class="fab-label">WhatsApp</span>
+          </button>
+          <button class="fab-item" @click="goToAccount">
+            <span class="fab-label">Cuenta</span>
           </button>
           <button class="fab-item" @click="goToHome">
             <span class="fab-icon"></span>
