@@ -485,7 +485,7 @@ const handleAddToCartFromModal = () => {
 /* Modal Principal */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1.5rem; }
 .modal-card { background: #ffffff; border-radius: 24px; max-width: 780px; width: 100%; padding: 2rem; position: relative; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); }
-.close-btn { position: absolute; top: 1.2rem; right: 1.2rem; background: #f0f0f0; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.close-btn { color: #111111 !important; position: absolute; top: 1.2rem; right: 1.2rem; background: #f0f0f0; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .close-btn:hover { background: #000; color: #fff; }
 .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
 .modal-image-wrapper { width: 100%; height: 320px; background-color: #f4f5f0; border-radius: 16px; overflow: hidden; }
@@ -527,6 +527,7 @@ const handleAddToCartFromModal = () => {
 /* Botones de Talla */
 .size-options { display: flex; gap: 0.5rem; }
 .size-btn { 
+  color: #111111 !important;
   min-width: 38px; 
   height: 38px; 
   border-radius: 8px; 
@@ -538,9 +539,9 @@ const handleAddToCartFromModal = () => {
   transition: all 0.2s ease; 
 }
 .size-btn.selected { 
-  background: #000; 
-  color: #fff; 
-  border-color: #000; 
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
 }
 
 /* Sub-modal Guía de Tallas */
